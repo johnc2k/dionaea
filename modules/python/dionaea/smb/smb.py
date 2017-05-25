@@ -70,7 +70,7 @@ class smbd(connection):
             'stop': False,
         }
         self.buf = b''
-		self.buf2 = b''    # ms17-010 SMB_COM_TRANSACTION2
+        self.buf2 = b''    # ms17-010 SMB_COM_TRANSACTION2
         self.outbuf = None
         self.fids = {}
         self.printer = b'' # spoolss file "queue"
