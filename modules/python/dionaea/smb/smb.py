@@ -590,20 +590,20 @@ class smbd(connection):
             if h.Setup[0] == SMB_TRANS2_SESSION_SETUP:
                 smblog.info('Possible DoublePulsar connection attempts..')
 
-				# determine DoublePulsar opcode and command
-				# https://zerosum0x0.blogspot.sg/2017/04/doublepulsar-initial-smb-backdoor-ring.html
-				# The opcode list is as follows:
-				# 0x23 = ping
-				# 0xc8 = exec
-				# 0x77 = kil
-				op = calculate_doublepulsar_opcode(h.Timeout)
-				op2 = hex(op)[-2:]
-				oplist = [('23','ping'), ('c8','exec'), ('77','kill')]
-				for fid,command in oplist:
-					if op2 == fid:
-        					smblog.info("DoublePulsar request opcode: %s command: %s" % (op2, command))
-				if op2 != '23' and op2 != 'c8' and op2 != '77':
-					smblog.info("unknown opcode: %s" % op2)
+                # determine DoublePulsar opcode and command
+                # https://zerosum0x0.blogspot.sg/2017/04/doublepulsar-initial-smb-backdoor-ring.html
+                # The opcode list is as follows:
+                # 0x23 = ping
+                # 0xc8 = exec
+                # 0x77 = kil
+                op = calculate_doublepulsar_opcode(h.Timeout)
+                op2 = hex(op)[-2:]
+                oplist = [('23','ping'), ('c8','exec'), ('77','kill')]
+                for fid,command in oplist:
+                    if op2 == fid:
+                            smblog.info("DoublePulsar request opcode: %s command: %s" % (op2, command))
+                if op2 != '23' and op2 != 'c8' and op2 != '77':
+                    smblog.info("unknown opcode: %s" % op2)
 
                 # make sure the payload size not larger than 10MB                
                 if len(self.buf2) > 10485760:
@@ -628,9 +628,9 @@ class smbd(connection):
 #                    f.write(xor_output)
 #                    f.close
 
-					# payload = some data(shellcode or code to load the executable) + executable itself
-					# try to locate the executable and remove the prepended data
-					# now, we will have the executable itself
+                    # payload = some data(shellcode or code to load the executable) + executable itself
+                    # try to locate the executable and remove the prepended data
+                    # now, we will have the executable itself
                     offset = 0
                     for i, c in enumerate(xor_output):
                         if ((xor_output[i] == 0x4d and xor_output[i+1] == 0x5a) and xor_output[i+2] == 0x90):
