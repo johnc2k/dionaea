@@ -1,7 +1,14 @@
-# Tested working on Ubuntu 14.04 amd64 Server
+# Tested working on:
+# Ubuntu 14.04 amd64 Server
+# Raspbian Jessie Lite 4.4 April 2017
+
+sudo apt-get update
+sudo apt-get upgrade -y
+sudo apt-get dist-upgrade -y
+
 
 cd ~
-apt-get install \
+sudo apt-get install \
     autoconf \
     automake \
     build-essential \
@@ -37,7 +44,7 @@ autoreconf -vi
     --with-nl-include=/usr/include/libnl3 \
     --with-nl-lib=/usr/lib
 make
-make install
+sudo make install
 
 cd /opt/dionaea/bin/
-./dionaea -w /opt/dionaea -p /opt/dionaea/var/run/dionaea.pid
+screen -S honeypot ./dionaea -l all,-debug -L '*' -w /opt/dionaea -p /opt/dionaea/var/run/dionaea.pid
