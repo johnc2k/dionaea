@@ -103,7 +103,7 @@ class RPCService(object):
                 r.CallID = p.CallID
                 r.FragLen = 24 + len(data)
                 rpclog.debug(data)
-#				print(r.show())
+#                print(r.show())
                 return r
         else:
             rpclog.info("Unknown RPC Call to %s %i" %
@@ -164,8 +164,8 @@ class ATSVC(RPCService):
 
         r = ndrlib.Packer()
         # pEnumContainer
-        r.pack_long(0)		# EntriesRead
-        r.pack_pointer(0)	# pEntries
+        r.pack_long(0)        # EntriesRead
+        r.pack_pointer(0)    # pEntries
         # pTotalEntries
         r.pack_long(0)
         # pResumeHandle
@@ -308,8 +308,8 @@ class IOXIDResolver(RPCService):
 
     class COMVERSION(object):
         # typedef struct tagCOMVERSION {
-        # 	unsigned short MajorVersion;
-        # 	unsigned short MinorVersion;
+        #     unsigned short MajorVersion;
+        #     unsigned short MinorVersion;
         # } COMVERSION;
 
         def __init__(self, p):
@@ -332,9 +332,9 @@ class IOXIDResolver(RPCService):
         # http://msdn.microsoft.com/en-us/library/cc226841%28PROT.10%29.aspx
         #
         # typedef struct tagDUALSTRINGARRAY {
-        # 	unsigned short wNumEntries;
-        # 	unsigned short wSecurityOffset;
-        # 	[size_is(wNumEntries)] unsigned short aStringArray[];
+        #     unsigned short wNumEntries;
+        #     unsigned short wSecurityOffset;
+        #     [size_is(wNumEntries)] unsigned short aStringArray[];
         # } DUALSTRINGARRAY;
         def __init__(self, p):
             self.__packer = p
@@ -376,8 +376,8 @@ class IOXIDResolver(RPCService):
         # http://msdn.microsoft.com/en-us/library/cc226838%28PROT.10%29.aspx
         #
         # fixmetypdef struct {
-        # 	unsigned short wTowerId
-        # 	char *aNetworkAddr
+        #     unsigned short wTowerId
+        #     char *aNetworkAddr
         # } STRINGBINDING;
         #
         # TowerId ->
@@ -405,9 +405,9 @@ class IOXIDResolver(RPCService):
         # http://msdn.microsoft.com/en-us/library/cc226839%28PROT.10%29.aspx
         #
         # fixmetypedef struct {
-        # 	unsigned short wAuthnSvc
-        #	unsigned short Reserved
-        #	wchar_t aPrincName
+        #     unsigned short wAuthnSvc
+        #    unsigned short Reserved
+        #    wchar_t aPrincName
 
         def __init__(self, p):
             self.__packer = p
@@ -432,12 +432,12 @@ class IOXIDResolver(RPCService):
 
         # http://msdn.microsoft.com/en-us/library/cc226953%28PROT.10%29.aspx
         #
-        #	[idempotent] error_status_t ServerAlive2(
-        #	  [in] handle_t hRpc,
-        #	  [out, ref] COMVERSION* pComVersion,
-        #	  [out, ref] DUALSTRINGARRAY** ppdsaOrBindings,
-        #	  [out, ref] DWORD* pReserved
-        #	);
+        #    [idempotent] error_status_t ServerAlive2(
+        #      [in] handle_t hRpc,
+        #      [out, ref] COMVERSION* pComVersion,
+        #      [out, ref] DUALSTRINGARRAY** ppdsaOrBindings,
+        #      [out, ref] DWORD* pReserved
+        #    );
         p = ndrlib.Packer()
 
         # prepare values
@@ -457,7 +457,7 @@ class IOXIDResolver(RPCService):
 
         s = IOXIDResolver.SECURITYBINDING(p)
         s.AuthnSvc = RPC_C_AUTHN.GSS_NEGOTIATE
-        s.PrincName = "OEMCOMPUTER"	# fixme: config value?
+        s.PrincName = "OEMCOMPUTER"    # fixme: config value?
         dsa.StringArray.append(s)
 
         # we are done, pack it
@@ -628,7 +628,7 @@ class lsarpc(RPCService):
                 self.__packer.pack_long(self.Pointer)
                 for j in range(self.Entries):
                     self.__packer.pack_string(self.Name[j].encode('utf16')[2:])
-                #  PRPC_SID Sid	;
+                #  PRPC_SID Sid    ;
                 sid = samr.RPC_SID(self.__packer)
                 sid.Value = 'NT_AUTHORITY'
                 sid.SubAuthority = ['32','544']
@@ -1079,12 +1079,12 @@ class MGMT(RPCService):
 
     class uuid_t(object):
         # typedef struct {
-        # 	unsigned32          time_low;
-        # 	unsigned16          time_mid;
-        # 	unsigned16          time_hi_and_version;
-        # 	unsigned8           clock_seq_hi_and_reserved;
-        # 	unsigned8           clock_seq_low;
-        # 	byte                node[6];
+        #     unsigned32          time_low;
+        #     unsigned16          time_mid;
+        #     unsigned16          time_hi_and_version;
+        #     unsigned8           clock_seq_hi_and_reserved;
+        #     unsigned8           clock_seq_low;
+        #     byte                node[6];
         # } uuid_t, *uuid_p_t;
         def __init__(self, p):
             self.__packer = p
@@ -1110,9 +1110,9 @@ class MGMT(RPCService):
 
     class rpc_if_id_t(object):
         # typedef struct {
-        # 	uuid_t                  uuid;
-        # 	unsigned16              vers_major;
-        # 	unsigned16              vers_minor;
+        #     uuid_t                  uuid;
+        #     unsigned16              vers_major;
+        #     unsigned16              vers_minor;
         # } rpc_if_id_t;
         # typedef [ptr] rpc_if_id_t *rpc_if_id_p_t;
         def __init__(self, p):
@@ -1132,9 +1132,9 @@ class MGMT(RPCService):
 
     class rpc_if_id_vector_t(object):
         # typedef struct {
-        # 	unsigned32              count;
-        # 	[size_is(count)]
-        # 	rpc_if_id_p_t           if_id[*];
+        #     unsigned32              count;
+        #     [size_is(count)]
+        #     rpc_if_id_p_t           if_id[*];
         # } rpc_if_id_vector_t;
         # typedef [ptr] rpc_if_id_vector_t *rpc_if_id_vector_p_t;
         def __init__(self, p):
@@ -1164,9 +1164,9 @@ class MGMT(RPCService):
         #
         # void rpc__mgmt_inq_if_ids
         # (
-        # 	[in]        handle_t                binding_handle,
-        # 	[out]       rpc_if_id_vector_p_t    *if_id_vector,
-        # 	[out]       error_status_t          *status
+        #     [in]        handle_t                binding_handle,
+        #     [out]       rpc_if_id_vector_p_t    *if_id_vector,
+        #     [out]       error_status_t          *status
         # );
         r = ndrlib.Packer()
         r.pack_pointer(0x4747)
@@ -1202,13 +1202,13 @@ class MGMT(RPCService):
         # );
         x = ndrlib.Unpacker(p.StubData)
         handle = MGMT.handle_t(x)
-#		authn_proto = x.unpack_long()
-#		princ_name_size = x.unpack_long()
+#        authn_proto = x.unpack_long()
+#        princ_name_size = x.unpack_long()
 
         r = ndrlib.Packer()
         r.pack_string(b"oemcomputer")
-#		r.pack_long(0)
-#		r.pack_long(0)
+#        r.pack_long(0)
+#        r.pack_long(0)
         return r.get_buffer()
 
 
@@ -1274,13 +1274,13 @@ class samr(RPCService):
         # } RPC_SID_IDENTIFIER_AUTHORITY;
         #
         SID_AUTHORITY = {
-            'NULL_SID_AUTHORITY'			: b'\x00\x00\x00\x00\x00\x00',
-            'WORLD_SID_AUTHORITY'			: b'\x00\x00\x00\x00\x00\x01',
-            'LOCAL_SID_AUTHORITY'			: b'\x00\x00\x00\x00\x00\x02',
-            'CREATOR_SID_AUTHORITY'			: b'\x00\x00\x00\x00\x00\x03',
-            'NON_UNIQUE_AUTHORITY'			: b'\x00\x00\x00\x00\x00\x04',
-            'NT_AUTHORITY'				: b'\x00\x00\x00\x00\x00\x05',
-            'SECURITY_MANDATORY_LABEL_AUTHORITY'	: b'\x00\x00\x00\x00\x00\x10'
+            'NULL_SID_AUTHORITY'            : b'\x00\x00\x00\x00\x00\x00',
+            'WORLD_SID_AUTHORITY'            : b'\x00\x00\x00\x00\x00\x01',
+            'LOCAL_SID_AUTHORITY'            : b'\x00\x00\x00\x00\x00\x02',
+            'CREATOR_SID_AUTHORITY'            : b'\x00\x00\x00\x00\x00\x03',
+            'NON_UNIQUE_AUTHORITY'            : b'\x00\x00\x00\x00\x00\x04',
+            'NT_AUTHORITY'                : b'\x00\x00\x00\x00\x00\x05',
+            'SECURITY_MANDATORY_LABEL_AUTHORITY'    : b'\x00\x00\x00\x00\x00\x10'
         }
         def __init__(self, p):
             self.__packer = p
@@ -1349,7 +1349,7 @@ class samr(RPCService):
         #   unsigned short Length;
         #   unsigned short MaximumLength;
         #   [size_is(MaximumLength/2), length_is(Length/2)]
-        # 	WCHAR* Buffer;
+        #     WCHAR* Buffer;
         # } RPC_UNICODE_STRING,
         #  *PRPC_UNICODE_STRING;
         #
@@ -2634,7 +2634,7 @@ class spoolss(RPCService):
                 self.OutputFile = self.__packer.unpack_string()
                 #self.DataType = self.__packer.unpack_string()
 
-#				rpclog.debug("DocName %s OutputFile %s" %(self.DocName,self.OutputFile))
+#                rpclog.debug("DocName %s OutputFile %s" %(self.DocName,self.OutputFile))
 
         def pack(self):
             if isinstance(self.__packer, ndrlib.Packer):
@@ -2930,29 +2930,50 @@ STYPE_TEMPORARY= 0x40000000 # A temporary share that is not persisted
 # for creation each time the file server initializes.
 
 __shares__ = {
-    'ADMIN$' : {
+    b'ADMIN$' : {
         'type': STYPE_DISKTREE,
         'comment' : 'Remote Admin',
         'path': 'C:\\Windows'
     },
-    'C$' : {
+    b'C$' : {
         'type': STYPE_DISKTREE|STYPE_SPECIAL,
         'comment' : 'Default Share',
         'path': 'C:\\'
     },
-    'IPC$' : {
+    b'IPC$' : {
         'type': STYPE_IPC,
         'comment' : 'Remote IPC',
         'path': ''
     },
-    'Printer' : {
+    b'Printer' : {
         'type' : STYPE_PRINTQ,
         'comment' : 'Microsoft XPS Document Writer',
         'path': '',
     }
 }
 
-
+__shares_Samba__ = {
+    b'admin' : { 
+        'type': STYPE_DISKTREE, 
+        'comment' : 'Remote Admin', 
+        'path': '\\home\\admin' 
+    },
+    b'share' : { 
+        'type': STYPE_DISKTREE, 
+        'comment' : 'Default Share', 
+        'path': '\\share'
+    },
+    b'IPC$' : { 
+        'type': STYPE_IPC, 
+        'comment' : 'IPC Service', 
+        'path': '' 
+    },
+    b'print' : {
+        'type' : STYPE_PRINTQ,
+        'comment' : 'Printer Drivers',
+        'path': '',
+    }
+}
 
 class SRVSVC(RPCService):
     """ [MS-SRVS]: Server Service Remote Protocol Specification
@@ -2986,7 +3007,7 @@ class SRVSVC(RPCService):
         #
         # http://msdn.microsoft.com/en-us/library/cc247105%28PROT.10%29.aspx
         #
-        # 	typedef [handle, string] WCHAR* SRVSVC_HANDLE;
+        #     typedef [handle, string] WCHAR* SRVSVC_HANDLE;
         def __init__(self, p):
             self.__packer = p
             if isinstance(self.__packer,ndrlib.Packer):
@@ -3085,7 +3106,7 @@ class SRVSVC(RPCService):
         def pack(self):
             if isinstance(self.__packer,ndrlib.Packer):
                 self.EntriesRead = len(self.Data)
-#				self.__packer.pack_long(self.EntriesRead)
+#                self.__packer.pack_long(self.EntriesRead)
                 # LPSHARE_INFO_2 Buffer
                 b = SRVSVC.SHARE_INFO_2(self.__packer)
                 b.Data = self.Data
@@ -3249,11 +3270,11 @@ class SRVSVC(RPCService):
                     self.__packer.pack_pointer(self.Netname_pointer) # netname
                     self.__packer.pack_long(data['type']) # STYPE_DISKTREE
                     self.__packer.pack_pointer(self.Remark_pointer) # remark
-                    self.__packer.pack_long(self.Permissions)		# permissions
+                    self.__packer.pack_long(self.Permissions)        # permissions
                     self.__packer.pack_long(self.Max_uses) # max_uses
-                    self.__packer.pack_long(self.Current_uses)		# current_uses
+                    self.__packer.pack_long(self.Current_uses)        # current_uses
                     self.__packer.pack_pointer(self.Path_pointer) # path
-                    self.__packer.pack_pointer(self.Passwd_pointer) 	# passwd
+                    self.__packer.pack_pointer(self.Passwd_pointer)     # passwd
                     self.__packer.pack_long(self.Reserved) # reserved
                     # security descriptor
                     self.__packer.pack_pointer(self.Security_descriptor)
@@ -3311,12 +3332,12 @@ class SRVSVC(RPCService):
                 self.share_path = self.__packer.unpack_string()
         def pack(self):
             if isinstance(self.__packer,ndrlib.Packer):
-                #				self.__packer.pack_pointer(self.Pointer)
-                #				self.MaxCount = len(self.Data)
-                #				self.__packer.pack_long(self.MaxCount)
+                #                self.__packer.pack_pointer(self.Pointer)
+                #                self.MaxCount = len(self.Data)
+                #                self.__packer.pack_long(self.MaxCount)
 
                 rpclog.warn("%s" % self.Data)
-#				raise Exception()
+#                raise Exception()
 
                 for i in self.Data:
                     data = self.Data[i]
@@ -3398,13 +3419,13 @@ class SRVSVC(RPCService):
         #
         # http://msdn.microsoft.com/en-us/library/cc247276%28PROT.10%29.aspx
         #
-        #	NET_API_STATUS NetrShareEnum(
-        #	  [in, string, unique] SRVSVC_HANDLE ServerName,
-        #	  [in, out] LPSHARE_ENUM_STRUCT InfoStruct,
-        #	  [in] DWORD PreferedMaximumLength,
-        #	  [out] DWORD* TotalEntries,
-        #	  [in, out, unique] DWORD* ResumeHandle
-        #	);
+        #    NET_API_STATUS NetrShareEnum(
+        #      [in, string, unique] SRVSVC_HANDLE ServerName,
+        #      [in, out] LPSHARE_ENUM_STRUCT InfoStruct,
+        #      [in] DWORD PreferedMaximumLength,
+        #      [out] DWORD* TotalEntries,
+        #      [in, out, unique] DWORD* ResumeHandle
+        #    );
 
         ServerName = SRVSVC.SRVSVC_HANDLE(x)
 
@@ -3412,12 +3433,12 @@ class SRVSVC(RPCService):
         #
         # http://msdn.microsoft.com/en-us/library/cc247161%28PROT.10%29.aspx
         #
-        #	typedef struct _SHARE_ENUM_STRUCT {
-        #	  DWORD Level;
-        #	  [switch_is(Level)] SHARE_ENUM_UNION ShareInfo;
-        #	} SHARE_ENUM_STRUCT,
-        #	 *PSHARE_ENUM_STRUCT,
-        #	 *LPSHARE_ENUM_STRUCT;
+        #    typedef struct _SHARE_ENUM_STRUCT {
+        #      DWORD Level;
+        #      [switch_is(Level)] SHARE_ENUM_UNION ShareInfo;
+        #    } SHARE_ENUM_STRUCT,
+        #     *PSHARE_ENUM_STRUCT,
+        #     *LPSHARE_ENUM_STRUCT;
 
         infostruct_level = x.unpack_long()
         infostruct_share = x.unpack_long()
@@ -3426,17 +3447,17 @@ class SRVSVC(RPCService):
         # [switch_type(DWORD)]
         #   union _SHARE_ENUM_UNION {
         #   [case(0)]
-        # 	SHARE_INFO_0_CONTAINER* Level0;
+        #     SHARE_INFO_0_CONTAINER* Level0;
         #   [case(1)]
-        # 	SHARE_INFO_1_CONTAINER* Level1;
+        #     SHARE_INFO_1_CONTAINER* Level1;
         #   [case(2)]
-        # 	SHARE_INFO_2_CONTAINER* Level2;
+        #     SHARE_INFO_2_CONTAINER* Level2;
         #   [case(501)]
-        # 	SHARE_INFO_501_CONTAINER* Level501;
+        #     SHARE_INFO_501_CONTAINER* Level501;
         #   [case(502)]
-        # 	SHARE_INFO_502_CONTAINER* Level502;
+        #     SHARE_INFO_502_CONTAINER* Level502;
         #   [case(503)]
-        # 	SHARE_INFO_503_CONTAINER* Level503;
+        #     SHARE_INFO_503_CONTAINER* Level503;
         # } SHARE_ENUM_UNION;
         if infostruct_share == 0:
             buffer = SRVSVC.SHARE_INFO_0_CONTAINER(x)
@@ -3487,15 +3508,15 @@ class SRVSVC(RPCService):
     @classmethod
     def handle_NetPathCanonicalize(cls, con, p):
         # MS08-067
-        #	WERROR srvsvc_NetPathCanonicalize(
-        #		[in,unique]   [string,charset(UTF16)] uint16 *server_unc,
-        #		[in]   [string,charset(UTF16)] uint16 path[],
-        #		[out]  [size_is(maxbuf)] uint8 can_path[],
-        #		[in]   uint32 maxbuf,
-        #		[in]   [string,charset(UTF16)] uint16 prefix[],
-        #		[in,out,ref] uint32 *pathtype,
-        #		[in]    uint32 pathflags
-        #		);
+        #    WERROR srvsvc_NetPathCanonicalize(
+        #        [in,unique]   [string,charset(UTF16)] uint16 *server_unc,
+        #        [in]   [string,charset(UTF16)] uint16 path[],
+        #        [out]  [size_is(maxbuf)] uint8 can_path[],
+        #        [in]   uint32 maxbuf,
+        #        [in]   [string,charset(UTF16)] uint16 prefix[],
+        #        [in,out,ref] uint32 *pathtype,
+        #        [in]    uint32 pathflags
+        #        );
         x = ndrlib.Unpacker(p.StubData)
         ref        = x.unpack_pointer()
         server_unc = x.unpack_string()
@@ -3526,13 +3547,13 @@ class SRVSVC(RPCService):
     @classmethod
     def handle_NetPathCompare(cls, con, p):
         # MS08-067
-        #	WERROR srvsvc_NetPathCompare(
-        #		[in,unique]   [string,charset(UTF16)] uint16 *server_unc,
-        #		[in]   [string,charset(UTF16)] uint16 path1[],
-        #		[in]   [string,charset(UTF16)] uint16 path2[],
-        #		[in]    uint32 pathtype,
-        #		[in]    uint32 pathflags
-        #		);
+        #    WERROR srvsvc_NetPathCompare(
+        #        [in,unique]   [string,charset(UTF16)] uint16 *server_unc,
+        #        [in]   [string,charset(UTF16)] uint16 path1[],
+        #        [in]   [string,charset(UTF16)] uint16 path2[],
+        #        [in]    uint32 pathtype,
+        #        [in]    uint32 pathflags
+        #        );
         p = ndrlib.Unpacker(p.StubData)
         ref        = p.unpack_pointer()
         server_unc = p.unpack_string()
@@ -3548,7 +3569,7 @@ class SRVSVC(RPCService):
             r.pack_long( 0 )
         else:
             r.pack_long( 0 )
-#		r.pack_long( x )
+#        r.pack_long( x )
         return r.get_buffer()
 
     @classmethod
@@ -3710,13 +3731,13 @@ class SRVSVC(RPCService):
         #Eg, time.struct_time(tm_year=2010, tm_mon=7, tm_mday=13, tm_hour=2, tm_min=12, tm_sec=27, tm_wday=1, tm_yday=194, tm_isdst=0)
 
         r.pack_long(int(time()))#elapsedt
-        r.pack_long(515893)	#msecs
-        r.pack_long(ctime[3])	#hours
+        r.pack_long(515893)    #msecs
+        r.pack_long(ctime[3])    #hours
         r.pack_long(ctime[4])   #mins
         r.pack_long(ctime[5])   #secs
-        r.pack_long(59) 	#hunds
+        r.pack_long(59)     #hunds
         r.pack_long_signed(int(altzone/60),) #timezone
-        r.pack_long(310) 	#tinterval
+        r.pack_long(310)     #tinterval
         r.pack_long(ctime[2])   #day
         r.pack_long(ctime[1])   #month
         r.pack_long(ctime[0])   #year
@@ -3777,29 +3798,29 @@ class SVCCTL(RPCService):
     @classmethod
     def handle_CloseServiceHandle(cls, con, p):
         # DWORD RCloseServiceHandle(
-        # 	[in, out] LPSC_RPC_HANDLE hSCObject
+        #     [in, out] LPSC_RPC_HANDLE hSCObject
         # );
         pass
 
     @classmethod
     def handle_CreateServiceA(cls, con, p):
         # DWORD RCreateServiceA(
-        # 	[in] SC_RPC_HANDLE hSCManager,
-        # 	[in, string, range(0, SC_MAX_NAME_LENGTH)] LPSTR lpServiceName,
-        # 	[in, string, unique, range(0, SC_MAX_NAME_LENGTH)] LPSTR lpDisplayName,
-        # 	[in] DWORD dwDesiredAccess,
-        # 	[in] DWORD dwServiceType,
-        # 	[in] DWORD dwStartType,
-        # 	[in] DWORD dwErrorControl,
-        # 	[in, string, range(0, SC_MAX_PATH_LENGTH)] LPSTR lpBinaryPathName,
-        # 	[in, string, unique, range(0, SC_MAX_NAME_LENGTH)] LPSTR lpLoadOrderGroup,
-        # 	[in, out, unique] LPDWORD lpdwTagId,
-        # 	[in, unique, size_is(dwDependSize)] LPBYTE lpDependencies,
-        # 	[in, range(0, SC_MAX_DEPEND_SIZE)] DWORD dwDependSize,
-        # 	[in, string, unique, range(0, SC_MAX_ACCOUNT_NAME_LENGTH)] LPSTR lpServiceStartName,
-        # 	[in, unique, size_is(dwPwSize)] LPBYTE lpPassword,
-        # 	[in, range(0, SC_MAX_PWD_SIZE)] DWORD dwPwSize,
-        # 	[out] LPSC_RPC_HANDLE lpServiceHandle
+        #     [in] SC_RPC_HANDLE hSCManager,
+        #     [in, string, range(0, SC_MAX_NAME_LENGTH)] LPSTR lpServiceName,
+        #     [in, string, unique, range(0, SC_MAX_NAME_LENGTH)] LPSTR lpDisplayName,
+        #     [in] DWORD dwDesiredAccess,
+        #     [in] DWORD dwServiceType,
+        #     [in] DWORD dwStartType,
+        #     [in] DWORD dwErrorControl,
+        #     [in, string, range(0, SC_MAX_PATH_LENGTH)] LPSTR lpBinaryPathName,
+        #     [in, string, unique, range(0, SC_MAX_NAME_LENGTH)] LPSTR lpLoadOrderGroup,
+        #     [in, out, unique] LPDWORD lpdwTagId,
+        #     [in, unique, size_is(dwDependSize)] LPBYTE lpDependencies,
+        #     [in, range(0, SC_MAX_DEPEND_SIZE)] DWORD dwDependSize,
+        #     [in, string, unique, range(0, SC_MAX_ACCOUNT_NAME_LENGTH)] LPSTR lpServiceStartName,
+        #     [in, unique, size_is(dwPwSize)] LPBYTE lpPassword,
+        #     [in, range(0, SC_MAX_PWD_SIZE)] DWORD dwPwSize,
+        #     [out] LPSC_RPC_HANDLE lpServiceHandle
         # );
         pass
 
@@ -3807,10 +3828,10 @@ class SVCCTL(RPCService):
     @classmethod
     def handle_OpenSCManagerA(cls, con, p):
         # DWORD ROpenSCManagerA(
-        # 	[in, string, unique, range(0, SC_MAX_COMPUTER_NAME_LENGTH)] SVCCTL_HANDLEA lpMachineName,
-        # 	[in, string, unique, range(0, SC_MAX_NAME_LENGTH)] LPSTR lpDatabaseName,
-        # 	[in] DWORD dwDesiredAccess,
-        # 	[out] LPSC_RPC_HANDLE lpScHandle
+        #     [in, string, unique, range(0, SC_MAX_COMPUTER_NAME_LENGTH)] SVCCTL_HANDLEA lpMachineName,
+        #     [in, string, unique, range(0, SC_MAX_NAME_LENGTH)] LPSTR lpDatabaseName,
+        #     [in] DWORD dwDesiredAccess,
+        #     [out] LPSC_RPC_HANDLE lpScHandle
         # );
         pass
 
@@ -3831,7 +3852,7 @@ class w32time(RPCService):
 
 
 #class winipsec(RPCService):
-#	uuid = UUID('12345678-1234-abcd-ef00-0123456789ab').hex
+#    uuid = UUID('12345678-1234-abcd-ef00-0123456789ab').hex
 
 
 class winreg(RPCService):

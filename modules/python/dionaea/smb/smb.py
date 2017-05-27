@@ -37,6 +37,8 @@ from uuid import UUID
 
 from .include.smbfields import *
 from .rpcservices import __shares__
+from .rpcservices import __shares_Samba__
+from .rpcservices import OS_TYPE
 from .include.gssapifields import GSSAPI,SPNEGO, NegTokenTarg
 from .include.ntlmfields import NTLMSSP_Header, NTLM_Negotiate, NTLM_Challenge, NTLMSSP_REQUEST_TARGET
 from .include.packet import Raw
@@ -300,6 +302,11 @@ class smbd(connection):
                             BER_CLASS_CON,1,1) + BER_len_enc(len(raw)) + raw
             elif p.haslayer(SMB_Sessionsetup_AndX_Request2):
                 r = SMB_Sessionsetup_AndX_Response2()
+                # quick fix to support for different OS type (Samba) for CVE-2017-7494 Samba SMB RCE
+                # TODO: there are definitely more things to tweak and make these real
+                if OS_TYPE == 5:
+                    r.NativeOS = "Windows 6.1\0"
+                    r.NativeLanManager = "Samba 4.3.11"
             else:
                 smblog.warn("Unknown Session Setup Type used")
 
@@ -334,6 +341,12 @@ class smbd(connection):
             elif h.Path == b'ADMIN$\0' or h.Path == b'C$\0':
                 r = SMB_Treeconnect_AndX_Response2()
                 rstatus = 0xc0000022 #STATUS_ACCESS_DENIED
+            # support for CVE-2017-7494 Samba SMB RCE
+            elif h.Path[-6:] == b'share\0' :
+                smblog.critical('Possible CVE-2017-7494 Samba SMB RCE attempts..')
+                r.AndXOffset = 0
+                r.Service = "A:\0"
+                r.NativeFileSystem = "NTFS\0"
         elif Command == SMB_COM_TREE_DISCONNECT:
             r = SMB_Treedisconnect()
         elif Command == SMB_COM_CLOSE:
@@ -348,6 +361,7 @@ class smbd(connection):
                 icd.report()
                 self.fids[p.FID].unlink(self.fids[p.FID].name)
                 del self.fids[p.FID]
+                r = SMB_Close_Response()
         elif Command == SMB_COM_LOGOFF_ANDX:
             r = SMB_Logoff_AndX()
         elif Command == SMB_COM_NT_CREATE_ANDX:
@@ -524,18 +538,28 @@ class smbd(connection):
                         rout.OutParams = struct.pack("<HH", l, l)
                     rout.OutData = b""
                     comments = []
-                    for i in __shares__:
-                        rout.OutData += struct.pack("<13sxHHH",
-                                                    i, # NetworkName
-                                                    # Pad
-                                                    # Type
-                                                    __shares__[i][
-                                                        'type'] & 0xff,
-                                                    # RemarkOffsetLow
-                                                    coff + len(__shares__)*20,
-                                                    0x0101) # RemarkOffsetHigh
-                        comments.append(__shares__[i]['comment'])
-                        coff += len(__shares__[i]['comment']) + 1
+                    # support for CVE-2017-7494 Samba SMB RCE
+                    # OS_TYPE = 5 (Linux Samba)
+                    if OS_TYPE == 5:
+                        for i in __shares_Samba__:
+                            rout.OutData += struct.pack("<13sxHHH", 
+                                i, # NetworkName
+                                # Pad
+                                __shares_Samba__[i]['type'] & 0xff, # Type
+                                coff + len(__shares_Samba__)*20, # RemarkOffsetLow
+                                0x0101) # RemarkOffsetHigh
+                            comments.append(__shares_Samba__[i]['comment'])
+                            coff += len(__shares_Samba__[i]['comment']) + 1
+                    else:
+                        for i in __shares__:
+                            rout.OutData += struct.pack("<13sxHHH", 
+                                i, # NetworkName
+                                # Pad
+                                __shares__[i]['type'] & 0xff, # Type
+                                coff + len(__shares__)*20, # RemarkOffsetLow
+                                0x0101) # RemarkOffsetHigh
+                            comments.append(__shares__[i]['comment'])
+                            coff += len(__shares__[i]['comment']) + 1
                     rout.show()
                 outpacket = rout
                 self.outbuf = outpacket.build()
@@ -654,14 +678,16 @@ class smbd(connection):
                     icd.url =  self.remote.host
                     icd.con = self
                     icd.report()
-            r = SMB_Trans2_Response()
-            rstatus = 0xc0000002 #STATUS_NOT_IMPLEMENTED
+                r = SMB_Trans2_Response()
+                rstatus = 0xc0000002 #STATUS_NOT_IMPLEMENTED
+            elif h.Setup[0] == SMB_TRANS2_FIND_FIRST2:
+                r = SMB_Trans2_FIND_FIRST2_Response()
+            else:
+                r = SMB_Trans2_Response()
             
         elif Command == SMB_COM_DELETE:
-            # specific for NMAP smb-enum-shares.nse support
             h = p.getlayer(SMB_Delete_Request)
-            if h.FileName == b'nmap-test-file\0':
-                r = SMB_Delete_Response()
+            r = SMB_Delete_Response()
         elif Command == SMB_COM_TRANSACTION2_SECONDARY:
             h = p.getlayer(SMB_Trans2_Secondary_Request)
             # TODO: need some extra works
@@ -678,18 +704,16 @@ class smbd(connection):
             smbh = SMB_Header(Status=rstatus)
             smbh.Command = r.smb_cmd
             smbh.Flags2 = p.getlayer(SMB_Header).Flags2
-            if Command == SMB_COM_TRANSACTION:
-                smbh.Flags2 = p.getlayer(SMB_Header).Flags2 | SMB_FLAGS2_ERR_STATUS
-                smblog.info('MS17-010 - responded with legitimate SMB with #STATUS_INSUFF_SERVER_RESOURCES')
-                smblog.info('MS17-010 - waiting for next incoming request.. ')
 #            smbh.Flags2 = p.getlayer(SMB_Header).Flags2 & ~SMB_FLAGS2_EXT_SEC
             smbh.MID = p.getlayer(SMB_Header).MID
             smbh.PID = p.getlayer(SMB_Header).PID
             # Deception for DoublePulsar, we fix the XOR key first as 0x5273365E 
             # WannaCry will use the XOR key to encrypt and deliver next payload, so we can decode easily later
             if Command == SMB_COM_TRANSACTION2:
-                smbh.MID = p.getlayer(SMB_Header).MID + 16
-                smbh.Signature = 0x000000009cf9c567
+            h = p.getlayer(SMB_Trans2_Request)
+                if h.Setup[0] == SMB_TRANS2_SESSION_SETUP:
+                    smbh.MID = p.getlayer(SMB_Header).MID + 16
+                    smbh.Signature = 0x000000009cf9c567
             rp = NBTSession()/smbh/r
 
         if Command in SMB_Commands:
