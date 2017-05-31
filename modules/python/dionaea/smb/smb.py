@@ -646,12 +646,20 @@ class smbd(connection):
                     hash_xor_output = hashlib.md5(xor_output);
                     smblog.info('DoublePulsar payload - MD5 (after XOR decryption ): %s' %(hash_xor_output.hexdigest()))
 
-                    #f = tempfile.NamedTemporaryFile(delete=False, prefix="xorfull-"+hash_xor_output.hexdigest()+"-", suffix="", dir=g_dionaea.config()['downloads']['dir'])
-                    dir=g_dionaea.config()['downloads']['dir'] + "/"
-#                    f = open(dir+hash_xor_output.hexdigest(),'wb')
-#                    f.write(xor_output)
-#                    f.close
+                    dionaea_config = g_dionaea.config().get("dionaea")
+                    download_dir = dionaea_config.get("download.dir")
 
+                    f = tempfile.NamedTemporaryFile(
+                        delete=False,
+                        prefix="xorfull-"+hash_xor_output.hexdigest()+"-",
+                        suffix="",
+                        dir=download_dir
+                    )
+                    
+                    f = open(download_dir+hash_xor_output.hexdigest(),'wb')
+                    f.write(xor_output)
+                    f.close
+                    
                     # payload = some data(shellcode or code to load the executable) + executable itself
                     # try to locate the executable and remove the prepended data
                     # now, we will have the executable itself
@@ -666,15 +674,22 @@ class smbd(connection):
 
                     # save the captured payload/gift/evil/buddy to disk
                     smblog.info('DoublePulsar payload - MD5 final: %s. Save to disk' %(hash_xor_output_mz.hexdigest()))
-                    #f1 = tempfile.NamedTemporaryFile(delete=False, prefix=hash_xor_output_mz.hexdigest()+"-", suffix="", dir=g_dionaea.config()['downloads']['dir'])
-                    f1 = open(dir+hash_xor_output_mz.hexdigest(),'wb')
+                    
+                    f1 = tempfile.NamedTemporaryFile(
+                         delete=False,
+                         prefix=hash_xor_output_mz.hexdigest()+"-",
+                         suffix="",
+                         dir=download_dir
+                    )
+
+                    f1 = open(download_dir+hash_xor_output_mz.hexdigest(),'wb')
                     f1.write(xor_output[offset:])
                     f1.close
                     self.buf2 = b''
                     xor_output = b''
 
                     icd = incident("dionaea.download.complete")
-                    icd.path = dir+hash_xor_output_mz.hexdigest()
+                    icd.path = download_dir+hash_xor_output_mz.hexdigest()
                     icd.url =  self.remote.host
                     icd.con = self
                     icd.report()
