@@ -725,7 +725,7 @@ class smbd(connection):
             # Deception for DoublePulsar, we fix the XOR key first as 0x5273365E 
             # WannaCry will use the XOR key to encrypt and deliver next payload, so we can decode easily later
             if Command == SMB_COM_TRANSACTION2:
-            h = p.getlayer(SMB_Trans2_Request)
+                h = p.getlayer(SMB_Trans2_Request)
                 if h.Setup[0] == SMB_TRANS2_SESSION_SETUP:
                     smbh.MID = p.getlayer(SMB_Header).MID + 16
                     smbh.Signature = 0x000000009cf9c567
